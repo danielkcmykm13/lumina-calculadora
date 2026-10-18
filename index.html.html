@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina - Calculadora</title>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0b3b2e;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        #calculadora {
+            width: 320px;
+            padding: 24px;
+            background: #1c2540;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px #0006;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 25px;
+            margin-top: 0;
+            color: #b7c1ff;
+        }
+
+        #visor {
+            background: #11182b;
+            border-radius: 12px;
+            padding: 20px 12px;
+            margin-bottom: 18px;
+            text-align: right;
+            font-size: 38px;
+            overflow-wrap: anywhere;
+        }
+
+        #botoes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 15px 0;
+            background: #303b5c;
+            color: white;
+            font-size: 19px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #46547d;
+        }
+
+        .operador {
+            background: #5559a8;
+        }
+
+        .limpar {
+            grid-column: span 4;
+            background: #8b6ee8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="calculadora">
+
+        <h1>Lumina</h1>
+
+        <div id="visor">0</div>
+
+        <div id="botoes">
+            <button class="limpar" onclick="limpar()">AC</button>
+
+            <button onclick="adicionarNumero('7')">7</button>
+            <button onclick="adicionarNumero('8')">8</button>
+            <button onclick="adicionarNumero('9')">9</button>
+            <button class="operador" onclick="escolherOperador('÷')">÷</button>
+
+            <button onclick="adicionarNumero('4')">4</button>
+            <button onclick="adicionarNumero('5')">5</button>
+            <button onclick="adicionarNumero('6')">6</button>
+            <button class="operador" onclick="escolherOperador('×')">×</button>
+
+            <button onclick="adicionarNumero('1')">1</button>
+            <button onclick="adicionarNumero('2')">2</button>
+            <button onclick="adicionarNumero('3')">3</button>
+            <button class="operador" onclick="escolherOperador('−')">−</button>
+
+            <button onclick="adicionarNumero('0')">0</button>
+            <button onclick="adicionarDecimal()">.</button>
+            <button onclick="calcular()">=</button>
+            <button class="operador" onclick="escolherOperador('+')">+</button>
+        </div>
+
+    </div>
+
+
+<script>
+    let primeiroNumero = null;
+    let operador = null;
+    let aguardandoSegundoNumero = false;
+
+function adicionarNumero(numero) {
+    const visor = document.getElementById("visor");
+
+    if (aguardandoSegundoNumero) {
+        visor.textContent = numero;
+        aguardandoSegundoNumero = false;
+    } else if (visor.textContent === "0") {
+        visor.textContent = numero;
+    } else {
+        visor.textContent += numero;
+    }
+}
+
+
+function escolherOperador(sinal) {
+    const visor = document.getElementById("visor");
+
+    primeiroNumero = Number(visor.textContent);
+    operador = sinal;
+    aguardandoSegundoNumero = true;
+}
+
+
+function calcular() {
+    const visor = document.getElementById("visor");
+    const segundoNumero = Number(visor.textContent);
+    let resultado;
+
+    if (operador === "+") {
+        resultado = primeiroNumero + segundoNumero;
+    } else if (operador === "−") {
+        resultado = primeiroNumero - segundoNumero;
+    } else if (operador === "×") {
+        resultado = primeiroNumero * segundoNumero;
+    } else if (operador === "÷") {
+        if (segundoNumero === 0) {
+            visor.textContent = "Erro: divisão por zero";
+            primeiroNumero = null;
+            operador = null;
+            aguardandoSegundoNumero = true;
+            return;
+        }
+
+        resultado = primeiroNumero / segundoNumero;
+    } else {
+        return;
+    }
+
+    visor.textContent = String(Number(resultado.toPrecision(12)));
+
+    primeiroNumero = resultado;
+    operador = null;
+    aguardandoSegundoNumero = true;
+}
+
+
+function limpar() {
+    const visor = document.getElementById("visor");
+
+    visor.textContent = "0";
+    primeiroNumero = null;
+    operador = null;
+    aguardandoSegundoNumero = false;
+}
+
+
+function adicionarDecimal() {
+    const visor = document.getElementById("visor");
+
+    if (aguardandoSegundoNumero) {
+        visor.textContent = "0.";
+        aguardandoSegundoNumero = false;
+        return;
+    }
+
+    if (!visor.textContent.includes(".")) {
+        visor.textContent += ".";
+    }
+}
+
+
+
+document.addEventListener("keydown", function(evento) {
+    const tecla = evento.key;
+
+    if (tecla >= "0" && tecla <= "9") {
+        adicionarNumero(tecla);
+
+    } else if (tecla === "." || tecla === ",") {
+        adicionarDecimal();
+
+    } else if (tecla === "+") {
+        escolherOperador("+");
+
+    } else if (tecla === "-") {
+        escolherOperador("−");
+
+    } else if (tecla === "*") {
+        escolherOperador("×");
+
+    } else if (tecla === "/") {
+        evento.preventDefault();
+        escolherOperador("÷");
+
+    } else if (tecla === "Enter" || tecla === "=") {
+        evento.preventDefault();
+        calcular();
+
+    } else if (tecla === "Escape") {
+        limpar();
+
+    } else if (tecla === "Backspace") {
+        const visor = document.getElementById("visor");
+
+        if (!aguardandoSegundoNumero) {
+            visor.textContent =
+                visor.textContent.length > 1
+                    ? visor.textContent.slice(0, -1)
+                    : "0";
+        }
+    }
+});
+
+
+</script>
+
+</body>
+</html>
